@@ -6,21 +6,14 @@ class CopycatTranslationsController < ActionController::Base
 
   def index
     params[:locale] = I18n.default_locale unless params.has_key?(:locale)
-    query = CopycatTranslation
-    query = query.where(locale: params[:locale]) unless params[:locale].blank?
 
-    if params.has_key?(:search)
-      if params[:search].blank?
-        @copycat_translations = query.all
-      else
-        key_like = CopycatTranslation.arel_table[:key].matches("%#{params[:search]}%")
-        value_like = CopycatTranslation.arel_table[:value].matches("%#{params[:search]}%")
-        @copycat_translations = query.where(key_like.or(value_like))
-      end
-    else
-      @copycat_translations = []
-    end
-    @locale_names = CopycatTranslation.find(:all, select: 'distinct locale').map(&:locale)
+    @locale_names = CopycatTranslation.defined_locales
+    @copycat_translations = []
+
+    return unless params.has_key?(:search)
+
+    @copycat_translations = CopycatTranslation.search(params[:locale],
+                                                      params[:search])
   end
 
   def edit
@@ -29,7 +22,7 @@ class CopycatTranslationsController < ActionController::Base
 
   def update
     @copycat_translation = CopycatTranslation.find(params[:id])
-    @copycat_translation.value = params[:copycat_translation][:value]
+    @copycat_translation.value = copycat_translation_params[:value]
     @copycat_translation.save!
     redirect_to copycat_translations_path, :notice => "#{@copycat_translation.key} updated!"
   end
@@ -93,5 +86,9 @@ class CopycatTranslationsController < ActionController::Base
       flash[:alert] = "Syncing failed: #{e}"
     end
     output
+  end
+
+  def copycat_translation_params
+    params[:copycat_translation].permit(:value)
   end
 end

@@ -84,7 +84,3 @@ describe CopycatTranslation do
   end
 
 end
-
-
-
-

@@ -7,7 +7,22 @@ class CopycatTranslation < ActiveRecord::Base
   validates :key, :presence => true
   validates :locale, :presence => true
 
-  attr_accessible :locale, :key, :value
+  def self.defined_locales
+    all.select(:locale).distinct.pluck(:locale)
+  end
+
+  def self.search locale, search
+    return self.all if locale.blank? && search.blank?
+
+    query = CopycatTranslation
+    query = query.where(locale: locale) unless locale.blank?
+
+    return query if search.blank?
+
+    key_like = CopycatTranslation.arel_table[:key].matches("%#{search}%")
+    value_like = CopycatTranslation.arel_table[:value].matches("%#{search}%")
+    query.where(key_like.or(value_like))
+  end
 
   module Serialize
 

@@ -143,8 +143,8 @@ EOF
 
     page.should have_content('Translations synced from source server')
 
-    CopycatTranslation.find_all_by_key('first_key').count.should eq(2)
-    CopycatTranslation.find_all_by_key('second_key').count.should eq(2)
-    CopycatTranslation.find_all_by_key('third_key').count.should eq(1)
+    CopycatTranslation.where(key: 'first_key').count.should eq(2)
+    CopycatTranslation.where(key: 'second_key').count.should eq(2)
+    CopycatTranslation.where(key: 'third_key').count.should eq(1)
   end
 end
