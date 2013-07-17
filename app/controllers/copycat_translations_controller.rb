@@ -31,7 +31,16 @@ class CopycatTranslationsController < ActionController::Base
     @copycat_translation = CopycatTranslation.find(params[:id])
     @copycat_translation.value = params[:copycat_translation][:value]
     @copycat_translation.save!
-    redirect_to copycat_translations_path, :notice => "#{@copycat_translation.key} updated!"
+
+    respond_to do |format|
+      format.html do
+        redirect_to copycat_translations_path, :notice => "#{@copycat_translation.key} updated!"    
+      end
+
+      format.js do
+        render :json => @copycat_translation
+      end
+    end
   end
 
   def import_export
